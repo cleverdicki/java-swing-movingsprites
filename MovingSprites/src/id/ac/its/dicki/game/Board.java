@@ -11,13 +11,28 @@ import java.awt.event.KeyEvent;
 import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import java.util.ArrayList;
 
 public class Board extends JPanel implements ActionListener {
     private final int ICRAFT_X = 40;
     private final int ICRAFT_Y = 60;
     private final int DELAY = 10;
     private Timer timer;
+    private boolean ingame;
     private SpaceShip spaceShip;
+    private List<Asteroid> asteroids;
+
+    private final int[][] pos = {
+            {2380, 29}, {2500, 59}, {1380, 89},
+            {780, 109}, {580, 139}, {680, 239},
+            {790, 259}, {760, 50}, {790, 150},
+            {980, 209}, {560, 45}, {510, 70},
+            {930, 159}, {590, 80}, {530, 60},
+            {940, 59}, {990, 30}, {920, 200},
+            {900, 259}, {660, 50}, {540, 90},
+            {810, 220}, {860, 20}, {740, 180},
+            {820, 128}, {490, 170}, {700, 30}
+    };
 
     public Board() {
 
@@ -31,9 +46,17 @@ public class Board extends JPanel implements ActionListener {
         setFocusable(true);
 
         spaceShip = new SpaceShip(ICRAFT_X, ICRAFT_Y);
+        initAsteroid();
 
         timer = new Timer(DELAY, this);
         timer.start();
+    }
+
+    private void initAsteroid() {
+        asteroids = new ArrayList<>();
+        for (int[] p:pos) {
+            asteroids.add(new Asteroid(p[0], p[1]));
+        }
     }
 
     @Override
@@ -56,8 +79,11 @@ public class Board extends JPanel implements ActionListener {
 
         for (Missile missile : missiles) {
 
-            g2d.drawImage(missile.getImage(), missile.getX(),
-                    missile.getY(), this);
+            g2d.drawImage(missile.getImage(), missile.getX(), missile.getY(), this);
+        }
+
+        for (Asteroid asteroid : asteroids) {
+            g2d.drawImage(asteroid.getImage(), asteroid.getX(), asteroid.getY(), this);
         }
     }
 
@@ -66,6 +92,7 @@ public class Board extends JPanel implements ActionListener {
 
         updateMissiles();
         updateSpaceShip();
+        updateAsteroid();
 
         repaint();
     }
@@ -93,6 +120,21 @@ public class Board extends JPanel implements ActionListener {
         spaceShip.move();
     }
 
+    private void updateAsteroid() {
+        if(asteroids.isEmpty()) {
+            ingame = false;
+            return;
+        }
+
+        for (int i=0 ; i < asteroids.size() ; i++) {
+            Asteroid asd = asteroids.get(i);
+            if(asd.isVisible())
+                asd.move();
+            else
+                asteroids.remove(i);
+        }
+    }
+
     private class TAdapter extends KeyAdapter {
 
         @Override
@@ -105,4 +147,5 @@ public class Board extends JPanel implements ActionListener {
             spaceShip.keyPressed(e);
         }
     }
+
 }
